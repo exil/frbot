@@ -1,34 +1,18 @@
 var Discord = require("discord.js");
 var config = require('./config');
+var commands = require('./commands');
+
 var bot = new Discord.Client();
 
 bot.on("message", msg => {
-    let prefix = '!';
+    let prefix = commands.prefix;
     let content = msg.content;
-    let user = msg.member;
-    let levels = ['beginner', 'intermediate', 'advanced'];
 
     if(!content.startsWith(prefix)) return;
 
     if (content.toLowerCase().startsWith(prefix + 'level')) {
-        // check if user already has one of the student roles
-        // insert here
-
         let command = content.split(' ');
-console.log(command);
-        if (command.length === 2 && command[1].length && levels.includes(command[1])) {
-            let level = command[1];
-            // get the role, then add it
-            let newRole = msg.guild.roles.find('name', level);
-console.log(user);
-            user.addRole(newRole).then(test => {
-                console.log("accept")
-                console.log(test);
-            }, test => {
-                console.log('reject')
-                console.log(test);
-            });
-        }
+        commands.newUser(command, msg);
     }
 
     return;
