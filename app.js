@@ -12,22 +12,26 @@ bot.on("message", msg => {
 
     if(!content.startsWith(prefix)) return;
 
-console.log(content);
-    let command = content.split(' ');
+    let command = content.toLowerCase();
+    let commandArgs = command.split(' ');
 
     if (!command) return;
 
-    if (content.toLowerCase().startsWith(prefix + 'level')) {
-        commands.setFrenchLevel(command[1], msg);
-    } else if (content.toLowerCase().startsWith(prefix + 'native')) {
-        commands.setNativeLanguage(command[1], msg);
-    } else if (content.toLowerCase().startsWith(prefix + 'country')) {
-        commands.setCountry(command[1], msg);
-    } else if (content.toLowerCase().startsWith(prefix + 'request')) {
-        commands.requestTag(command[1], msg);
-    } else if (content.toLowerCase().startsWith(prefix + 'remind')) {
+    // for single argument commands, only allow one space.
+    // if more than one space, assume argument is multi-word
+    var arg = commandArgs.slice(1).join(' ');
+
+    if (command.startsWith(prefix + 'french')) {
+        commands.setFrenchLevel(arg, msg);
+    } else if (command.startsWith(prefix + 'language')) {
+        commands.setNativeLanguage(arg, msg);
+    } else if (command.startsWith(prefix + 'origin')) {
+        commands.setCountry(arg, msg);
+    }  else if (command.startsWith(prefix + 'list')) {
+        commands.getList(arg, msg);
+    } else if (command.startsWith(prefix + 'remind')) {
         // todo
-    } else if (content.toLowerCase().startsWith(prefix + 'tag')) {
+    } else if (command.startsWith(prefix + 'tag')) {
         // todo (admin only)
     }
 
@@ -35,8 +39,31 @@ console.log(content);
 });
 
 bot.on("guildMemberAdd", (member) => {
-    //console.log(`New User "${member.user.username}" has joined "${member.guild.name}"` );
-    member.guild.defaultChannel.sendMessage('Bienvenue ' + member.user.username + '! Please answer a few questions. Use the `!level [beginner|intermediate|advanced|native]` command to indicate your level in French. Example: `!level native`');
+    member.guild.defaultChannel.sendMessage(`
+**Welcome to the official /r/French Discord, <@${user.id}>! To gain access to the chat, you must follow these instructions to set your proficiency in French, native language (if not French), and country.**\n`);
+    member.guild.defaultChannel.sendMessage(`
+
+1. Set your proficiency in French.
+\`\`\`
+!french [beginner|intermediate|advanced|native]
+\`\`\`
+2. Choose your native language (if it is French, continue to step 3.)
+\`\`\`
+!language [language]
+\`\`\`
+3. Indicate your country.
+\`\`\`
+!origin [country]
+\`\`\`
+*To get a list of countries or languages:*
+\`\`\`
+!list [countries|languages]
+\`\`\`
+*If your country or language isn't listed:*
+\`\`\`
+!language [other] or !country [other]
+\`\`\`
+        `);
 });
 
 bot.on('ready', () => {

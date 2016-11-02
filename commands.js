@@ -5,14 +5,14 @@ var commands = {
     prefix: '!'
 }
 
+// !french [beginner|intermediate|advanced|native]
 commands.setFrenchLevel = (input, data) => {
-    console.log(data.guild.channels);
     let validRoles = Role.normalUserRoles;
     let user = data.member;
 
     // empty argument
     if (!input) {
-        data.guild.defaultChannel.sendMessage('You need to enter in a role.');
+        data.channel.sendMessage('You need to enter in a role.');
         return;
     }
 
@@ -21,7 +21,7 @@ commands.setFrenchLevel = (input, data) => {
     // make sure user doesn't already have a student or native role...
     // alternatively, maybe we should remove the old role?
     if (User.hasNormalUserRole(user)) {
-        data.guild.defaultChannel.sendMessage('You\'ve already been tagged with a French level...');
+        data.channel.sendMessage('You\'ve already been tagged with a French level...');
         return;
     }
 
@@ -30,45 +30,29 @@ commands.setFrenchLevel = (input, data) => {
 
     // role isn't in the list, or it's not a valid normal user role
     if (!role || !validRoles.includes(role)) {
-        data.guild.defaultChannel.sendMessage('That is not a valid level role. Did you misspell something?');
+        data.channel.sendMessage('That is not a valid level role. Did you misspell something?');
         return;
     }
 
     // get the Role object
     let newRole = data.guild.roles.find('name', role);
 
+
     user.addRole(newRole).then(test => {
-        data.guild.defaultChannel.sendMessage('You\'ve been tagged with `' + role + '`.');
-
-        // bot shouldn't continue if they already have a language set
-
-        if (role !== Role.names.NATIVE) {
-            if (User.hasLanguageRole(user)) {
-                return;
-            }
-
-            data.guild.defaultChannel.sendMessage('Now please tell us your native language by using the `!native [language]` command. Example: `!native English`');
-        } else {
-            // lets not duplicate this code...
-            if (User.hasCountryRole(user)) {
-                return;
-            }
-
-            data.guild.defaultChannel.sendMessage('Please tell us what country you\'re from if you wish to do so. Example: `!country Canada`');
-        }
-
+        data.channel.sendMessage('You\'ve been tagged with `' + role + '`.');
     }, test => {
-        data.guild.defaultChannel.sendMessage('Something went wrong...');
+        data.channel.sendMessage('Something went wrong...');
     });
 }
 
+// !language [language]
 commands.setNativeLanguage = (input, data) => {
     let validRoles = Role.languages;
     let user = data.member;
 
     // empty argument
     if (!input) {
-        data.guild.defaultChannel.sendMessage('You need to enter in a role.');
+        data.channel.sendMessage('You need to enter in a role.');
         return;
     }
 
@@ -79,7 +63,8 @@ commands.setNativeLanguage = (input, data) => {
 
     // role isn't in the list, or it's not a valid language role
     if (!role || !validRoles.includes(role)) {
-        data.guild.defaultChannel.sendMessage('That is not a valid language role. Did you misspell something? If not, use the `!request [tag]` command to request a tag.');
+        data.channel.sendMessage('I don\'t recognize that language. I\'ve put in a request to add it.');
+        requestTag(input, data);
         return;
     }
 
@@ -87,26 +72,20 @@ commands.setNativeLanguage = (input, data) => {
     let newRole = data.guild.roles.find('name', role);
 
     data.member.addRole(newRole).then(test => {
-        data.guild.defaultChannel.sendMessage('You\'ve been tagged with `' + role + '`.');
-
-        // bot shouldn't say this if they already have a country set
-        if (User.hasCountryRole(user)) {
-            return;
-        }
-
-        data.guild.defaultChannel.sendMessage('Please tell us what country you\'re from if you wish to do so. Example: `!country Canada`');
+        data.channel.sendMessage('You\'ve been tagged with `' + role + '`.');
     }, test => {
-        data.guild.defaultChannel.sendMessage('Something went wrong...');
+        data.channel.sendMessage('Something went wrong...');
     });
 }
 
+// !origin [country]
 commands.setCountry = (input, data) => {
     let validRoles = Role.countries;
     let user = data.member;
 
     // empty argument
     if (!input) {
-        data.guild.defaultChannel.sendMessage('You need to enter in a role.');
+        data.channel.sendMessage('You need to enter in a role.');
         return;
     }
 
@@ -115,7 +94,7 @@ commands.setCountry = (input, data) => {
     // make sure user doesn't already have a country role...
     // alternatively, maybe we should remove the old role?
     if (User.hasCountryRole(user)) {
-        data.guild.defaultChannel.sendMessage('You\'ve already been tagged with a country.');
+        data.channel.sendMessage('You\'ve already been tagged with a country.');
         return;
     }
 
@@ -124,7 +103,8 @@ commands.setCountry = (input, data) => {
 
     // role isn't in the list, or it's not a valid country role
     if (!role || !validRoles.includes(role)) {
-        data.guild.defaultChannel.sendMessage('That country isn\'t in our list. Did you misspell something? If not, use the `!request [tag]` command to request a tag.');
+        data.channel.sendMessage('I don\'t recognize that country. I\'ve put in a request to add it.');
+        requestTag(input, data);
         return;
     }
 
@@ -132,36 +112,20 @@ commands.setCountry = (input, data) => {
     let newRole = data.guild.roles.find('name', role);
 
     data.member.addRole(newRole).then(test => {
-        data.guild.defaultChannel.sendMessage('You\'ve been tagged with `' + role + '`.');
+        data.channel.sendMessage('You\'ve been tagged with `' + role + '`.');
     }, test => {
-        data.guild.defaultChannel.sendMessage('Something went wrong...');
+        data.channel.sendMessage('Something went wrong...');
     });
 }
 
+commands.getList = (input, data) => {
 
-commands.requestTag = (input, data) => {
+}
+
+requestTag = (input, data) => {
+    let text = input.toLowerCase();
     let user = data.member.user;
 
-    console.log(user);
-
-    // empty argument
-    if (!input) {
-        data.guild.defaultChannel.sendMessage('You need to enter in something.');
-        return;
-    }
-
-    let text = input.toLowerCase();
-
-    // verify if role exists
-    let role = Role.alts[text];
-
-    // role isn't in the list, or it's not a valid country role
-    if (role) {
-        data.guild.defaultChannel.sendMessage('Hm, it appears that that tag already exists!');
-        return;
-    }
-
-    // send it to the suggestions
     let suggestions = data.guild.channels.find('name', 'suggestions');
 
     suggestions.sendMessage('Tag Suggestion by <@' + user.id + '>: `' + text + '`');
