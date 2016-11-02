@@ -10,6 +10,8 @@ commands.setFrenchLevel = (input, data) => {
     let validRoles = Role.normalUserRoles;
     let user = data.member;
 
+    console.log(Role);
+
     // empty argument
     if (!input) {
         data.channel.sendMessage('You need to enter in a role.');
@@ -26,7 +28,7 @@ commands.setFrenchLevel = (input, data) => {
     }
 
     // find role in alt list
-    let role = Role.alts[text];
+    let role = Role.names[text];
 
     // role isn't in the list, or it's not a valid normal user role
     if (!role || !validRoles.includes(role)) {
@@ -59,7 +61,7 @@ commands.setNativeLanguage = (input, data) => {
     let text = input.toLowerCase();
 
     // find role in alt list
-    let role = Role.alts[text];
+    let role = Role.names[text];
 
     // role isn't in the list, or it's not a valid language role
     if (!role || !validRoles.includes(role)) {
@@ -99,7 +101,7 @@ commands.setCountry = (input, data) => {
     }
 
     // find role in alt list
-    let role = Role.alts[text];
+    let role = Role.names[text];
 
     // role isn't in the list, or it's not a valid country role
     if (!role || !validRoles.includes(role)) {

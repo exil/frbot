@@ -1,4 +1,5 @@
 var Discord = require("discord.js");
+//var db = require('db');
 var config = require('./config');
 var commands = require('./commands');
 

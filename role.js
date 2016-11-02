@@ -1,33 +1,54 @@
+var db = require('./db');
+
 var Role = {};
 
-// enum for role names. value represents
-// actual role name in Discord (should replace with ID)
 Role.names = {
     // french level
-    'BEGINNER': 'beginner',
-    'INTERMEDIATE': 'intermediate',
-    'ADVANCED': 'advanced',
-    'NATIVE': 'Francophone natif',
-    // native language
-    'ENGLISH': 'Anglophone natif',
-    'FRENCH': 'Francophone natif',
-    'SPANISH': 'Hispanophone natif',
-    'ITALIAN': 'Italophone natif',
-    'GERMAN': 'Germanophone natif',
-    'PORTUGUESE': 'Lusophone natif',
-    'GREEK': 'Grécophone natif',
-    'SWEDISH': 'Suédophone natif',
-    'FINNISH': 'Finnophone natif',
-    // country
-    'UNITED_STATES': 'États-Unis',
-    'UNITED_KINGDOM': 'Royaume-Uni',
-    'IRELAND': 'Irland',
-    'AUSTRALIA': 'Australie',
-    'CANADA': 'Canada',
-    'FRANCE': 'France'
+    'beginner': 'Débutant',
+    'intermediate': 'Intermédiaire',
+    'advanced': 'avancé',
+    'native': 'Francophone natif',
 }
+Role.normalUserRoles = [
+    Role.names.beginner,
+    Role.names.intermediate,
+    Role.names.advanced,
+    Role.names.native
+];
+Role.languages = [];
+Role.countries = [];
+
+
+Role.init = () => {
+    db.query('SELECT * FROM languages').on('result', function(row) {
+        Role.names[row.friendly.toLowerCase()] = row.role;
+        if (!Role.languages.includes(row.role)) {
+            Role.languages.push(row.role);
+        }
+    }).on('error', function(err) {
+        console.log('Error loading languages: ' + err);
+    }).on('end', function() {
+        // sort alpha
+        Role.languages.sort((a, b) => {return a > b});
+    });
+
+    db.query('SELECT * FROM countries').on('result', function(row) {
+        Role.names[row.friendly.toLowerCase()] = row.role;
+        if (!Role.countries.includes(row.role)) {
+            Role.countries.push(row.role);
+        }
+    }).on('error', function(err) {
+        console.log('Error loading countries: ' + err);
+    }).on('end', function() {
+        // all rows have been received
+        Role.countries.sort((a, b) => {return a > b});
+    });
+}
+
+Role.init();
+
 // possible names for each role
-Role.alts = {
+/*Role.alts = {
     'beginner': Role.names.BEGINNER,
     'debutant': Role.names.BEGINNER,
     'débutant': Role.names.BEGINNER,
@@ -78,30 +99,6 @@ Role.alts = {
     'australie': Role.names.AUSTRALIA,
     'france': Role.names.FRANCE,
     'canada': Role.names.CANADA,
-}
-Role.normalUserRoles = [
-    Role.names.BEGINNER,
-    Role.names.INTERMEDIATE,
-    Role.names.ADVANCED,
-    Role.names.NATIVE
-];
-Role.languages = [
-    Role.names.ENGLISH,
-    Role.names.FRENCH,
-    Role.names.SPANISH,
-    Role.names.ITALIAN,
-    Role.names.PORTUGUESE,
-    Role.names.GREEK,
-    Role.names.SWEDISH,
-    Role.names.FINNISH
-];
-Role.countries = [
-    Role.names.UNITED_STATES,
-    Role.names.UNITED_KINGDOM,
-    Role.names.IRELAND,
-    Role.names.AUSTRALIA,
-    Role.names.FRANCE,
-    Role.names.CANADA
-];
+}*/
 
 module.exports = Role;
