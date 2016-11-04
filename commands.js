@@ -12,7 +12,7 @@ var REQUEST_LIMIT = 5;
 // !french [beginner|intermediate|advanced|native]
 commands.setFrenchLevel = (input, data) => {
     let validRoles = Role.studentRoles;
-    let user = data.member;
+    var user = data.member;
 
     // empty argument
     if (!input) {
@@ -56,13 +56,13 @@ commands.setFrenchLevel = (input, data) => {
     }, err => {
         data.channel.sendMessage('Something went wrong...');
     });
-}
+};
 
 // !language [language]
 commands.setNativeLanguage = (input, data) => {
     let validRoles = Role.languages;
     let user = data.member;
-    let noRole = 'SANS LANGUE';
+    let noRole = Role.NO_LANGUAGE;
 
     // empty argument
     if (!input) {
@@ -96,9 +96,9 @@ commands.setNativeLanguage = (input, data) => {
                     user.removeRole(roleToRemove).then((info) => {
                         checkIfReady(user, data);
                     }, err => {
-                        console.log('Error trying to remove SANS LANGUE role:' + err);
+                        console.log('Error trying to remove SANS PAYS role:' + err);
                     });
-                }, 0);
+                }, 200);
             }
         }
 
@@ -106,13 +106,13 @@ commands.setNativeLanguage = (input, data) => {
     }, err => {
         data.channel.sendMessage('Something went wrong...');
     });
-}
+};
 
 // !origin [country]
 commands.setCountry = (input, data) => {
     let validRoles = Role.countries;
     let user = data.member;
-    let noRole = 'SANS PAYS';
+    let noRole = Role.NO_COUNTRY;
 
     // empty argument
     if (!input) {
@@ -156,13 +156,12 @@ commands.setCountry = (input, data) => {
 
                     setTimeout(() => {
                         user.removeRole(roleToRemove).then((info) => {
-                            console.log(info);
-                            console.log('removed sans pays role');
+
                             checkIfReady(user, data);
                         }, err => {
                             console.log('Error trying to remove SANS PAYS role:' + err);
                         });
-                    }, 0);
+                    }, 200);
                 }
         }
 
@@ -170,7 +169,7 @@ commands.setCountry = (input, data) => {
     }, err => {
         data.channel.sendMessage('Something went wrong...');
     });
-}
+};
 
 commands.getList = (input, data) => {
     if (input === 'countries') {
@@ -178,7 +177,7 @@ commands.getList = (input, data) => {
     } else if (input === 'languages') {
         data.channel.sendMessage('```' + Role.languagesFriendly.join('\n') + '```');
     }
-}
+};
 
 commands.loadRoles = (data) => {
     if (!User.hasModRole(data.member)) return;
@@ -194,7 +193,50 @@ commands.loadRoles = (data) => {
           .then(role => console.log(`Created role ${role}`))
           .catch(console.error)
     }
-}
+};
+
+commands.tagUser = (input, data) => {
+    let userId = data.mentions.users.first();
+
+    data.guild.fetchMember(userId).then((user) => {
+        if (!user) return;
+
+        let text = input.toLowerCase();
+        let role = Role.names[text];
+
+        if (!role) return;
+
+        let newRole = data.guild.roles.find('name', role);
+        let noRole = Role.isCountryRole(role) ? Role.NO_COUNTRY : Role.NO_LANGUAGE;
+
+        setTimeout(function() {
+            user.addRole(newRole).then(response => {
+                data.channel.sendMessage(userId + ': You\'ve been tagged with `' + role + '`.');
+
+                if (User.hasRole(user, [noRole])) {
+                    let roleToRemove = data.guild.roles.find('name', noRole);
+
+                    setTimeout(() => {
+                        user.removeRole(roleToRemove).then((info) => {
+
+                            checkIfReady(user, data);
+                        }, err => {
+                            console.log('Error trying to remove SANS PAYS role:' + err);
+                        });
+                    }, 200);
+                }
+
+                checkIfReady(user, data);
+            }, err => {
+                data.channel.sendMessage('Something went wrong...');
+            });
+        }, 200);
+
+        return;
+    }, err => {
+        console.log('User didn\'t have "New" role to begin with?:' + err);
+    });
+};
 
 var requestTag = (input, data, type) => {
     let text = input.toLowerCase();
@@ -231,6 +273,19 @@ var checkIfReady = (user, data) => {
         }, 0)
     }
 };
+
+// removes sans pays/sans langue role. make this more generic
+// var removeRole = (data, role) => {
+//     let roleToRemove = data.guild.roles.find('name', role);
+
+//     setTimeout(() => {
+//         data.member.removeRole(roleToRemove).then((info) => {
+//             checkIfReady(user, data);
+//         }, err => {
+//             console.log('Error trying to remove SANS PAYS role:' + err);
+//         });
+//     }, 200);
+// };
 
 // clear the requests array every hour
 setInterval(function() {

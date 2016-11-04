@@ -19,8 +19,10 @@ Role.languages = [];
 Role.languagesFriendly = [];
 Role.countries = [];
 Role.countriesFriendly = [];
+Role.NO_COUNTRY = 'SANS PAYS';
+Role.NO_LANGUAGE = 'SANS LANGUE';
 
-Role.init = () => {
+var init = () => {
     db.query('SELECT * FROM languages').on('result', function(row) {
         Role.names[row.friendly.toLowerCase()] = row.role;
         if (!Role.languages.includes(row.role)) {
@@ -48,7 +50,21 @@ Role.init = () => {
     });
 }
 
-Role.init();
+init();
+
+// helper functions
+Role.isLanguageRole = (role) => {
+    return Role.languagesFriendly.some(function(el, i) {
+        return el.toLowerCase() === role.toLowerCase();
+    });
+};
+
+// helper functions
+Role.isCountryRole = (role) => {
+    return Role.countriesFriendly.some(function(el, i) {
+        return el.toLowerCase() === role.toLowerCase();
+    });
+}
 
 // possible names for each role
 Role.alts = {

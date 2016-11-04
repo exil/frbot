@@ -1,6 +1,7 @@
 var Discord = require("discord.js");
 var config = require('./config');
 var commands = require('./commands');
+var User = require('./user');
 var ADMIN_MODE = 0;
 
 
@@ -9,10 +10,11 @@ var bot = new Discord.Client();
 bot.on("message", msg => {
     if(msg.author.bot) return;
 
-    if (ADMIN_MODE && !msg.member.user.roles.exists('id', '242563745556070400')) return;
+    //if (ADMIN_MODE && !msg.member.user.roles.exists('id', '242563745556070400')) return;
 
     let prefix = commands.prefix;
     let content = msg.content;
+    var isAdmin = false;
 
     if(!content.startsWith(prefix)) return;
 
@@ -25,9 +27,11 @@ bot.on("message", msg => {
     // if more than one space, assume argument is multi-word
     var arg = commandArgs.slice(1).join(' ');
 
+    // in case user puts []'s around the tag
     if (arg.startsWith('[') && arg.endsWith(']')) {
         arg = arg.slice(1, -1);
     }
+
 
     if (command.startsWith(prefix + 'french') || command.startsWith(prefix + 'level')) {
         commands.setFrenchLevel(arg, msg);
@@ -40,9 +44,11 @@ bot.on("message", msg => {
     } else if (command.startsWith(prefix + 'remind')) {
         // todo
     } else if (command.startsWith(prefix + 'tag')) {
-        // first parameter is user, second is tag name typed out
-
-        commands.tagUser(arg, msg);
+        // for admins only:
+        if (User.hasModRole(msg.member) && msg.mentions) {
+            arg = commandArgs.slice(1, -1).join(' ');
+            commands.tagUser(arg, msg);
+        }
     } else if (command.startsWith(prefix + 'load')) {
         commands.loadRoles(msg);//commands.load(msg);
     }
