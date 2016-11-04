@@ -21,22 +21,19 @@ bot.on("message", msg => {
 
     if (!command) return;
 
-    console.log(msg.mentions.roles);
-
     // for single argument commands, only allow one space.
     // if more than one space, assume argument is multi-word
     var arg = commandArgs.slice(1).join(' ');
 
     if (arg.startsWith('[') && arg.endsWith(']')) {
         arg = arg.slice(1, -1);
-        console.log(arg);
     }
 
-    if (command.startsWith(prefix + 'french')) {
+    if (command.startsWith(prefix + 'french') || command.startsWith(prefix + 'level')) {
         commands.setFrenchLevel(arg, msg);
-    } else if (command.startsWith(prefix + 'language')) {
+    } else if (command.startsWith(prefix + 'language') || command.startsWith(prefix + 'native')) {
         commands.setNativeLanguage(arg, msg);
-    } else if (command.startsWith(prefix + 'origin')) {
+    } else if (command.startsWith(prefix + 'origin') || command.startsWith(prefix + 'country')) {
         commands.setCountry(arg, msg);
     }  else if (command.startsWith(prefix + 'list')) {
         commands.getList(arg, msg);
@@ -62,7 +59,7 @@ bot.on("guildMemberAdd", (member) => {
     });
 
     member.guild.defaultChannel.sendMessage(`
-**Welcome to the official /r/French Discord, <@${user.id}>! To gain access to the chat, you must follow these instructions to set your proficiency in French, native language (if not French), and country.**\n`);
+**Welcome to the official /r/French Discord, <@${member.user.id}>! To gain access to the chat, you must follow these instructions to set your proficiency in French, native language (if not French), and country.**\n`);
     member.guild.defaultChannel.sendMessage(`
 
 1. Set your proficiency in French.

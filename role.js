@@ -45,7 +45,6 @@ Role.init = () => {
     }).on('end', function() {
         // all rows have been received
         Role.countriesFriendly.sort();
-        console.log(Role.countriesFriendly);
     });
 }
 

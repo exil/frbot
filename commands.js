@@ -7,6 +7,7 @@ var commands = {
 // key = user
 // array of requests
 var REQUESTS = {};
+var REQUEST_LIMIT = 5;
 
 // !french [beginner|intermediate|advanced|native]
 commands.setFrenchLevel = (input, data) => {
@@ -40,19 +41,18 @@ commands.setFrenchLevel = (input, data) => {
     // get the Role object
     let newRole = data.guild.roles.find('name', role);
 
-    // also add the étudiant role
-    let studentRole = data.guild.roles.find('name', 'Étudiant');
-
     user.addRole(newRole).then(response => {
         data.channel.sendMessage('You\'ve been tagged with `' + role + '`.');
+        // also add the étudiant role if they're not a french native
+        if (text !== 'native') {
+            let studentRole = data.guild.roles.find('name', 'Étudiant');
+
+            user.addRole(studentRole).then(response => {}, err => {
+                data.channel.sendMessage('Something went wrong...');
+            });
+        }
 
         checkIfReady(user, data);
-    }, err => {
-        data.channel.sendMessage('Something went wrong...');
-    });
-
-    user.addRole(studentRole).then(response => {
-
     }, err => {
         data.channel.sendMessage('Something went wrong...');
     });
@@ -80,12 +80,6 @@ commands.setNativeLanguage = (input, data) => {
         data.channel.sendMessage('I don\'t recognize that language. I\'ve put in a request to add it.');
         role = noRole;
         requestTag(input, data, 'language');
-    } else {
-        // remove SANS LANGUE if they have it
-        let roleToRemove = data.guild.roles.find('name', noRole);
-        user.removeRole(roleToRemove).then(() => {}, err => {
-            console.log('Error trying to remove SANS LANGUE role:' + err);
-        });
     }
 
     // get the Role object
@@ -95,13 +89,17 @@ commands.setNativeLanguage = (input, data) => {
         if (role !== noRole) {
             data.channel.sendMessage('You\'ve been tagged with `' + role + '`.');
 
-            let roleToRemove = data.guild.roles.find('name', noRole);
+            if (User.hasRole(user, [noRole])) {
+                let roleToRemove = data.guild.roles.find('name', noRole);
 
-            user.removeRole(roleToRemove).then(() => {
-                console.log('removed sans pays role')
-            }, err => {
-                console.log('Error trying to remove SANS PAYS role:' + err);
-            });
+                setTimeout(() => {
+                    user.removeRole(roleToRemove).then((info) => {
+                        checkIfReady(user, data);
+                    }, err => {
+                        console.log('Error trying to remove SANS LANGUE role:' + err);
+                    });
+                }, 0);
+            }
         }
 
         checkIfReady(user, data);
@@ -123,8 +121,6 @@ commands.setCountry = (input, data) => {
     }
 
     let text = input.toLowerCase();
-
-
 
     // make sure user doesn't already have a country role...
     // alternatively, maybe we should remove the old role?
@@ -155,13 +151,19 @@ commands.setCountry = (input, data) => {
         if (role !== noRole) {
             data.channel.sendMessage('You\'ve been tagged with `' + role + '`.');
 
-            let roleToRemove = data.guild.roles.find('name', noRole);
+                if (User.hasRole(user, [noRole])) {
+                    let roleToRemove = data.guild.roles.find('name', noRole);
 
-            user.removeRole(roleToRemove).then(() => {
-                console.log('removed sans pays role')
-            }, err => {
-                console.log('Error trying to remove SANS PAYS role:' + err);
-            });
+                    setTimeout(() => {
+                        user.removeRole(roleToRemove).then((info) => {
+                            console.log(info);
+                            console.log('removed sans pays role');
+                            checkIfReady(user, data);
+                        }, err => {
+                            console.log('Error trying to remove SANS PAYS role:' + err);
+                        });
+                    }, 0);
+                }
         }
 
         checkIfReady(user, data);
@@ -211,7 +213,7 @@ var requestTag = (input, data, type) => {
     REQUESTS.id.push(text);
 
     // don't let the user request more than 3 times
-    if (REQUESTS.id.length <= 3 && !hasDuplicate) {
+    if (REQUESTS.id.length <= REQUEST_LIMIT && !hasDuplicate) {
         let suggestions = data.guild.channels.find('name', 'suggestions');
         suggestions.sendMessage(type + ' tag request by <@' + user.id + '>: `' + text + '`');
     }
@@ -222,9 +224,11 @@ var checkIfReady = (user, data) => {
     if (User.hasProperRoles(user)) {
         let role = data.guild.roles.find('name', 'New');
 
-        user.removeRole(role).then(() => {}, err => {
-            console.log('User didn\'t have "New" role to begin with?:' + err);
-        });
+        setTimeout(function() {
+            user.removeRole(role).then(() => {}, err => {
+                console.log('User didn\'t have "New" role to begin with?:' + err);
+            });
+        }, 0)
     }
 };
 
