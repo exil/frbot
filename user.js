@@ -3,8 +3,8 @@ var Role = require("./role");
 
 var User = {};
 
-User.hasNormalUserRole = (user) => {
-    return User.hasRole(user, Role.normalUserRoles);
+User.hasLevelRole = (user) => {
+    return User.hasRole(user, Role.studentRoles);
 }
 
 
@@ -16,12 +16,23 @@ User.hasNativeRole = (user) => {
 
 }
 
+User.hasModRole = (user) => {
+    return user.roles.exists('id', '242563745556070400');
+}
+
 User.hasLanguageRole = (user) => {
     return User.hasRole(user, Role.languages);
 }
 
 User.hasCountryRole = (user) => {
     return User.hasRole(user, Role.countries);
+}
+
+// checks if user has level, country, and native language roles
+User.hasProperRoles = (user) => {
+    return User.hasLevelRole(user) &&
+        (User.hasLanguageRole(user) || User.hasRole(user, ['SANS LANGUE'])) &&
+        (User.hasCountryRole(user) || User.hasRole(user, ['SANS PAYS']));
 }
 
 User.hasRole = (user, roles) => {

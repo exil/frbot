@@ -1,12 +1,15 @@
 var Discord = require("discord.js");
-//var db = require('db');
 var config = require('./config');
 var commands = require('./commands');
+var ADMIN_MODE = 0;
+
 
 var bot = new Discord.Client();
 
 bot.on("message", msg => {
     if(msg.author.bot) return;
+
+    if (ADMIN_MODE && !msg.member.user.roles.exists('id', '242563745556070400')) return;
 
     let prefix = commands.prefix;
     let content = msg.content;
@@ -18,9 +21,16 @@ bot.on("message", msg => {
 
     if (!command) return;
 
+    console.log(msg.mentions.roles);
+
     // for single argument commands, only allow one space.
     // if more than one space, assume argument is multi-word
     var arg = commandArgs.slice(1).join(' ');
+
+    if (arg.startsWith('[') && arg.endsWith(']')) {
+        arg = arg.slice(1, -1);
+        console.log(arg);
+    }
 
     if (command.startsWith(prefix + 'french')) {
         commands.setFrenchLevel(arg, msg);
@@ -33,13 +43,24 @@ bot.on("message", msg => {
     } else if (command.startsWith(prefix + 'remind')) {
         // todo
     } else if (command.startsWith(prefix + 'tag')) {
-        // todo (admin only)
+        // first parameter is user, second is tag name typed out
+
+        commands.tagUser(arg, msg);
+    } else if (command.startsWith(prefix + 'load')) {
+        commands.loadRoles(msg);//commands.load(msg);
     }
 
     return;
 });
 
 bot.on("guildMemberAdd", (member) => {
+    // add New role
+    let newRole = member.guild.roles.find('name', 'New');
+
+    member.addRole(newRole).then(response => {}, err => {
+        console.log('New role was not added:' + err);
+    });
+
     member.guild.defaultChannel.sendMessage(`
 **Welcome to the official /r/French Discord, <@${user.id}>! To gain access to the chat, you must follow these instructions to set your proficiency in French, native language (if not French), and country.**\n`);
     member.guild.defaultChannel.sendMessage(`
