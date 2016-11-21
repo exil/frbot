@@ -2,8 +2,6 @@ var Discord = require("discord.js");
 var config = require('./config');
 var commands = require('./commands');
 var User = require('./user');
-var ADMIN_MODE = 0;
-
 
 var bot = new Discord.Client();
 
@@ -14,7 +12,6 @@ bot.on("message", msg => {
 
     let prefix = commands.prefix;
     let content = msg.content;
-    var isAdmin = false;
 
     if(!content.startsWith(prefix)) return;
 
@@ -32,25 +29,46 @@ bot.on("message", msg => {
         arg = arg.slice(1, -1);
     }
 
-
-    if (command.startsWith(prefix + 'french') || command.startsWith(prefix + 'level')) {
+    if (config.DEV_MODE) {
+        if (command.startsWith(prefix + 'french') || command.startsWith(prefix + 'level')) {
         commands.setFrenchLevel(arg, msg);
-    } else if (command.startsWith(prefix + 'language') || command.startsWith(prefix + 'native')) {
-        commands.setNativeLanguage(arg, msg);
-    } else if (command.startsWith(prefix + 'origin') || command.startsWith(prefix + 'country')) {
-        commands.setCountry(arg, msg);
-    }  else if (command.startsWith(prefix + 'list')) {
-        commands.getList(arg, msg);
-    } else if (command.startsWith(prefix + 'remind')) {
-        // todo
-    } else if (command.startsWith(prefix + 'tag')) {
-        // for admins only:
-        if (User.hasModRole(msg.member) && msg.mentions) {
-            arg = commandArgs.slice(1, -1).join(' ');
-            commands.tagUser(arg, msg);
+        } else if (command.startsWith(prefix + 'language') || command.startsWith(prefix + 'native')) {
+            commands.setNativeLanguage(arg, msg);
+        } else if (command.startsWith(prefix + 'origin') || command.startsWith(prefix + 'country')) {
+            commands.setCountry(arg, msg);
+        }  else if (command.startsWith(prefix + 'list')) {
+            commands.getList(arg, msg);
+        } else if (command.startsWith(prefix + 'remind')) {
+            // todo
+        } else if (command.startsWith(prefix + 'tag')) {
+            // for admins only:
+            if (User.hasModRole(msg.member) && msg.mentions) {
+                arg = commandArgs.slice(1, -1).join(' ');
+                commands.tagUser(arg, msg);
+            }
+        } else if (command.startsWith(prefix + 'load')) {
+            commands.loadRoles(msg);//commands.load(msg);
         }
-    } else if (command.startsWith(prefix + 'load')) {
-        commands.loadRoles(msg);//commands.load(msg);
+    }
+
+    // grab meta data
+    if (User.hasModRole(msg.member)) {
+        if (command.startsWith(prefix + 'grabthestuff')) {
+            // print out all the roles
+            console.log(msg.guild.roles.map(function(role, index) {
+                return {
+                    name: role.name,
+                    id: role.id,
+                    color: role.color
+                }
+            }));
+            console.log(msg.guild.channels.map(function(role, index) {
+                return {
+                    name: role.name,
+                    id: role.id
+                }
+            }));
+        }
     }
 
     return;
@@ -95,4 +113,4 @@ bot.on('ready', () => {
     console.log('I am ready!');
 });
 
-bot.login(config.BOT_TOKEN);
+bot.login(config.BOT_TOKEN.dev);

@@ -1,5 +1,6 @@
 var Discord = require("discord.js");
 var Role = require("./role");
+var server = require("./server");
 
 var User = {};
 
@@ -17,7 +18,7 @@ User.hasNativeRole = (user) => {
 }
 
 User.hasModRole = (user) => {
-    return user.roles.exists('id', '242563745556070400');
+    return user.roles.exists('id', server.admin);
 }
 
 User.hasLanguageRole = (user) => {
