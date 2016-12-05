@@ -83,7 +83,6 @@ bot.on("message", msg => {
 });
 
 bot.on("guildMemberAdd", (member) => {
-console.log('hello');
     // add New role
 	member.guild.defaultChannel.sendMessage(`
 		**Welcome to the official /r/French Discord, <@${member.user.id}>! To gain access to the chat, you must follow these instructions to set your proficiency in French, native language (if not French), and country.**\n`);

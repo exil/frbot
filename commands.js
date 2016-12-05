@@ -8,6 +8,7 @@ var commands = {
 // array of requests
 var REQUESTS = {};
 var REQUEST_LIMIT = 5;
+var DELAY = 1000;
 
 // !french [beginner|intermediate|advanced|native]
 commands.setFrenchLevel = (input, data) => {
@@ -40,7 +41,6 @@ commands.setFrenchLevel = (input, data) => {
 
     // get the Role object
     let newRole = data.guild.roles.find('name', role);
-
     user.addRole(newRole).then(response => {
         data.channel.sendMessage('You\'ve been tagged with `' + role + '`.');
         // also add the étudiant role if they're not a french native
@@ -82,6 +82,10 @@ commands.setNativeLanguage = (input, data) => {
         requestTag(input, data, 'language');
     }
 
+	if (text === 'french') {
+		role = Role.names.native;
+	}
+
     // get the Role object
     let newRole = data.guild.roles.find('name', role);
 
@@ -98,7 +102,7 @@ commands.setNativeLanguage = (input, data) => {
                     }, err => {
                         console.log('Error trying to remove SANS PAYS role:' + err);
                     });
-                }, 200);
+                }, DELAY);
             }
         }
 
@@ -131,7 +135,6 @@ commands.setCountry = (input, data) => {
 
     // find role in alt list
     var role = Role.names[text];
-console.log(Role.names);
     // check alt list
     if (!role) {
         role = Role.alts[text];
@@ -161,10 +164,10 @@ console.log(Role.names);
                         }, err => {
                             console.log('Error trying to remove SANS PAYS role:' + err);
                         });
-                    }, 200);
+                    }, DELAY);
                 }
         }
-
+console.log('checking if ready');
         checkIfReady(user, data);
     }, err => {
         data.channel.sendMessage('Something went wrong...');
@@ -223,14 +226,14 @@ commands.tagUser = (input, data) => {
                         }, err => {
                             console.log('Error trying to remove SANS PAYS role:' + err);
                         });
-                    }, 200);
+                    }, DELAY);
                 }
 
                 checkIfReady(user, data);
             }, err => {
                 data.channel.sendMessage('Something went wrong...');
             });
-        }, 200);
+        }, DELAY);
 
         return;
     }, err => {
@@ -263,7 +266,7 @@ var requestTag = (input, data, type) => {
 
 // checks to see if user has all the proper roles to see all the chats
 var checkIfReady = (user, data) => {
-    if (User.hasProperRoles(user)) {
+	if (User.hasProperRoles(user)) {
         let role = data.guild.roles.find('name', 'Membre Officiel');
 
         setTimeout(function() {

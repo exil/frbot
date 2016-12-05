@@ -24,7 +24,6 @@ Role.NO_LANGUAGE = 'SANS LANGUE';
 
 var init = () => {
     db.query('SELECT * FROM languages').on('result', function(row) {
-		console.log(row.role);
 		Role.names[row.friendly.toLowerCase()] = row.role;
         if (!Role.languages.includes(row.role)) {
             Role.languages.push(row.role);
