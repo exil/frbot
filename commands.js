@@ -131,7 +131,7 @@ commands.setCountry = (input, data) => {
 
     // find role in alt list
     var role = Role.names[text];
-
+console.log(Role.names);
     // check alt list
     if (!role) {
         role = Role.alts[text];
@@ -256,7 +256,7 @@ var requestTag = (input, data, type) => {
 
     // don't let the user request more than 3 times
     if (REQUESTS.id.length <= REQUEST_LIMIT && !hasDuplicate) {
-        let suggestions = data.guild.channels.find('name', 'suggestions');
+        let suggestions = data.guild.channels.find('name', 'server_log');
         suggestions.sendMessage(type + ' tag request by <@' + user.id + '>: `' + text + '`');
     }
 };
@@ -264,11 +264,11 @@ var requestTag = (input, data, type) => {
 // checks to see if user has all the proper roles to see all the chats
 var checkIfReady = (user, data) => {
     if (User.hasProperRoles(user)) {
-        let role = data.guild.roles.find('name', 'New');
+        let role = data.guild.roles.find('name', 'Membre Officiel');
 
         setTimeout(function() {
-            user.removeRole(role).then(() => {}, err => {
-                console.log('User didn\'t have "New" role to begin with?:' + err);
+            user.addRole(role).then(() => {}, err => {
+                console.log('Didn\'t add membre role sucucssfully.:' + err);
             });
         }, 0)
     }

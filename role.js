@@ -6,8 +6,8 @@ Role.names = {
     // french level
     'beginner': 'Débutant',
     'intermediate': 'Intermédiaire',
-    'advanced': 'avancé',
-    'native': 'Francophone natif',
+    'advanced': 'Avancé',
+    'native': 'Francophone Natif',
 }
 Role.studentRoles = [
     Role.names.beginner,
@@ -24,7 +24,8 @@ Role.NO_LANGUAGE = 'SANS LANGUE';
 
 var init = () => {
     db.query('SELECT * FROM languages').on('result', function(row) {
-        Role.names[row.friendly.toLowerCase()] = row.role;
+		console.log(row.role);
+		Role.names[row.friendly.toLowerCase()] = row.role;
         if (!Role.languages.includes(row.role)) {
             Role.languages.push(row.role);
             Role.languagesFriendly.push(row.friendly);
@@ -102,10 +103,11 @@ Role.alts = {
     // 'finnish': Role.names.FINNISH,
     // 'finnois': Role.names.FINNISH,
     // countries
-    'united states': 'United States',
-    'united states of america': 'United States',
-    'us': 'United States',
-    'usa': 'United States',
+    'united states': 'États-Unis',
+    'united states of america': 'États-Unis',
+    'us': 'États-Unis',
+    'usa': 'États-Unis',
+    'america': 'États-Unis'
     // 'etats-unis': Role.names.UNITED_STATES,
     // 'états-unis': Role.names.UNITED_STATES,
     // 'états unis': Role.names.UNITED_STATES,

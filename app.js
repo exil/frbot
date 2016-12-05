@@ -2,6 +2,7 @@ var Discord = require("discord.js");
 var config = require('./config');
 var commands = require('./commands');
 var User = require('./user');
+var Role = require('./role');
 
 var bot = new Discord.Client();
 
@@ -29,27 +30,32 @@ bot.on("message", msg => {
         arg = arg.slice(1, -1);
     }
 
-    if (config.DEV_MODE) {
-        if (command.startsWith(prefix + 'french') || command.startsWith(prefix + 'level')) {
-        commands.setFrenchLevel(arg, msg);
-        } else if (command.startsWith(prefix + 'language') || command.startsWith(prefix + 'native')) {
-            commands.setNativeLanguage(arg, msg);
-        } else if (command.startsWith(prefix + 'origin') || command.startsWith(prefix + 'country')) {
-            commands.setCountry(arg, msg);
-        }  else if (command.startsWith(prefix + 'list')) {
-            commands.getList(arg, msg);
-        } else if (command.startsWith(prefix + 'remind')) {
-            // todo
-        } else if (command.startsWith(prefix + 'tag')) {
-            // for admins only:
-            if (User.hasModRole(msg.member) && msg.mentions) {
-                arg = commandArgs.slice(1, -1).join(' ');
-                commands.tagUser(arg, msg);
-            }
-        } else if (command.startsWith(prefix + 'load')) {
-            commands.loadRoles(msg);//commands.load(msg);
-        }
-    }
+	if (command.startsWith(prefix + 'french') || command.startsWith(prefix + 'level')) {
+		commands.setFrenchLevel(arg, msg);
+	} else if (command.startsWith(prefix + 'language') || command.startsWith(prefix + 'native')) {
+		commands.setNativeLanguage(arg, msg);
+	} else if (command.startsWith(prefix + 'origin') || command.startsWith(prefix + 'country')) {
+		commands.setCountry(arg, msg);
+	}  else if (command.startsWith(prefix + 'list')) {
+		commands.getList(arg, msg);
+	} else if (command.startsWith(prefix + 'remind')) {
+		// todo
+	} else if (command.startsWith(prefix + 'tag')) {
+		// for admins only:
+		if (User.hasModRole(msg.member) && msg.mentions) {
+			arg = commandArgs.slice(1, -1).join(' ');
+			commands.tagUser(arg, msg);
+		}
+	} else if (command.startsWith(prefix + 'help')) {
+		msg.channel.sendMessage(`
+\`\`\`
+!french [beginner|intermediate|advanced|native]
+!language [language]
+!country [country]
+!list [countries|languages]
+\`\`\`
+		`);
+	}	
 
     // grab meta data
     if (User.hasModRole(msg.member)) {
@@ -68,35 +74,32 @@ bot.on("message", msg => {
                     id: role.id
                 }
             }));
-        }
-    }
+        } else if (command.startsWith(prefix + 'load')) {
+//			commands.loadRoles(msg);//commands.load(msg);
+		}
+     }
 
     return;
 });
 
 bot.on("guildMemberAdd", (member) => {
+console.log('hello');
     // add New role
-    let newRole = member.guild.roles.find('name', 'New');
-
-    member.addRole(newRole).then(response => {}, err => {
-        console.log('New role was not added:' + err);
-    });
-
-    member.guild.defaultChannel.sendMessage(`
-**Welcome to the official /r/French Discord, <@${member.user.id}>! To gain access to the chat, you must follow these instructions to set your proficiency in French, native language (if not French), and country.**\n`);
-    member.guild.defaultChannel.sendMessage(`
+	member.guild.defaultChannel.sendMessage(`
+		**Welcome to the official /r/French Discord, <@${member.user.id}>! To gain access to the chat, you must follow these instructions to set your proficiency in French, native language (if not French), and country.**\n`);
+			member.guild.defaultChannel.sendMessage(`
 
 1. Set your proficiency in French.
 \`\`\`
 !french [beginner|intermediate|advanced|native]
 \`\`\`
-2. Choose your native language (if it is French, continue to step 3.)
+2. Choose your native language (if French, skip this step.)
 \`\`\`
 !language [language]
 \`\`\`
 3. Indicate your country.
 \`\`\`
-!origin [country]
+!country [country]
 \`\`\`
 *To get a list of countries or languages:*
 \`\`\`
@@ -106,11 +109,11 @@ bot.on("guildMemberAdd", (member) => {
 \`\`\`
 !language [other] or !country [other]
 \`\`\`
-        `);
+`);
 });
 
 bot.on('ready', () => {
     console.log('I am ready!');
 });
 
-bot.login(config.BOT_TOKEN.dev);
+bot.login(config.BOT_TOKEN.live);
