@@ -9,6 +9,8 @@ var bot = new Discord.Client();
 bot.on("message", msg => {
     if(msg.author.bot) return;
 
+    if (msg.channel.type === 'dm') return;
+
     //if (ADMIN_MODE && !msg.member.user.roles.exists('id', '242563745556070400')) return;
 
     let prefix = commands.prefix;
@@ -29,6 +31,8 @@ bot.on("message", msg => {
     if (arg.startsWith('[') && arg.endsWith(']')) {
         arg = arg.slice(1, -1);
     }
+
+    arg = arg.trim();
 
 	if (command.startsWith(prefix + 'french') || command.startsWith(prefix + 'level')) {
 		commands.setFrenchLevel(arg, msg);
@@ -55,7 +59,7 @@ bot.on("message", msg => {
 !list [countries|languages]
 \`\`\`
 		`);
-	}	
+	}
 
     // grab meta data
     if (User.hasModRole(msg.member)) {
@@ -75,7 +79,7 @@ bot.on("message", msg => {
                 }
             }));
         } else if (command.startsWith(prefix + 'load')) {
-//			commands.loadRoles(msg);//commands.load(msg);
+			//commands.loadRoles(msg);//commands.load(msg);
 		}
      }
 
@@ -85,7 +89,7 @@ bot.on("message", msg => {
 bot.on("guildMemberAdd", (member) => {
     // add New role
 	member.guild.defaultChannel.sendMessage(`
-		**Welcome to the official /r/French Discord, <@${member.user.id}>! To gain access to the chat, you must follow these instructions to set your proficiency in French, native language (if not French), and country.**\n`);
+		**Welcome to the official /r/French Discord, <@${member.user.id}>! To gain access to the chat, please follow these instructions to set your proficiency in French, native language (if not French), and country.**\n`);
 			member.guild.defaultChannel.sendMessage(`
 
 1. Set your proficiency in French.
@@ -106,7 +110,7 @@ bot.on("guildMemberAdd", (member) => {
 \`\`\`
 *If your country or language isn't listed:*
 \`\`\`
-!language [other] or !country [other]
+!language [yourlanguagehere] or !country [yourcountryhere]
 \`\`\`
 `);
 });

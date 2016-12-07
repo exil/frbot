@@ -8,7 +8,7 @@ var commands = {
 // array of requests
 var REQUESTS = {};
 var REQUEST_LIMIT = 5;
-var DELAY = 1000;
+var DELAY = 3000;
 
 // !french [beginner|intermediate|advanced|native]
 commands.setFrenchLevel = (input, data) => {
@@ -26,33 +26,34 @@ commands.setFrenchLevel = (input, data) => {
     // make sure user doesn't already have a student or native role...
     // alternatively, maybe we should remove the old role?
     if (User.hasLevelRole(user)) {
-        data.channel.sendMessage('You\'ve already been tagged with a French level...');
+        data.channel.sendMessage('<@' + user.user.id + '>: You\'ve already been tagged with a French level...');
         return;
     }
 
     // find role in alt list
     let role = Role.names[text];
+    let isNative = text !== 'native';
 
     // role isn't in the list, or it's not a valid normal user role
     if (!role || !validRoles.includes(role)) {
-        data.channel.sendMessage('That is not a valid level role. Did you misspell something?');
+        data.channel.sendMessage('<@' + user.user.id + '>: That is not a valid level role. Did you misspell something?');
         return;
     }
 
     // get the Role object
     let newRole = data.guild.roles.find('name', role);
-    user.addRole(newRole).then(response => {
-        data.channel.sendMessage('You\'ve been tagged with `' + role + '`.');
-        // also add the étudiant role if they're not a french native
-        if (text !== 'native') {
-            let studentRole = data.guild.roles.find('name', 'Étudiant');
+    let roles = [newRole];
 
-            user.addRole(studentRole).then(response => {}, err => {
-                data.channel.sendMessage('Something went wrong...');
-            });
-        }
+    if (isNative) {
+        roles.push(data.guild.roles.find('name', 'Étudiant'));
+    }
 
-        checkIfReady(user, data);
+    if (userReady(user, isNative)) {
+        roles.push(getAccessRole(data));
+    }
+
+    user.addRoles(roles).then(response => {
+        data.channel.sendMessage('<@' + user.user.id + '>: You\'ve been tagged with `' + role + '`.');
     }, err => {
         data.channel.sendMessage('Something went wrong...');
     });
@@ -66,7 +67,7 @@ commands.setNativeLanguage = (input, data) => {
 
     // empty argument
     if (!input) {
-        data.channel.sendMessage('You need to enter in a role.');
+        data.channel.sendMessage('<@' + user.user.id + '>: You need to enter in a role.');
         return;
     }
 
@@ -75,38 +76,47 @@ commands.setNativeLanguage = (input, data) => {
     // find role in alt list
     var role = Role.names[text];
 
+    // check alt list
+    if (!role) {
+        role = Role.alts[text];
+    }
+
     // role isn't in the list, or it's not a valid language role
     if (!role || !validRoles.includes(role)) {
-        data.channel.sendMessage('I don\'t recognize that language. I\'ve put in a request to add it.');
+        data.channel.sendMessage('<@' + user.user.id + '>: I don\'t recognize that language. I\'ve put in a request to add it.');
         role = noRole;
         requestTag(input, data, 'language');
     }
 
-	if (text === 'french') {
+    let isFrench = text === 'french';
+
+	if (isFrench) {
 		role = Role.names.native;
 	}
 
     // get the Role object
     let newRole = data.guild.roles.find('name', role);
+    let roles = [newRole];
 
-    data.member.addRole(newRole).then(response => {
+    if (userReady(user, isFrench)) {
+        roles.push(getAccessRole(data));
+    }
+
+    user.addRoles(roles).then(response => {
         if (role !== noRole) {
-            data.channel.sendMessage('You\'ve been tagged with `' + role + '`.');
+            data.channel.sendMessage('<@' + user.user.id + '>: You\'ve been tagged with `' + role + '`.');
 
             if (User.hasRole(user, [noRole])) {
                 let roleToRemove = data.guild.roles.find('name', noRole);
 
                 setTimeout(() => {
                     user.removeRole(roleToRemove).then((info) => {
-                        checkIfReady(user, data);
                     }, err => {
                         console.log('Error trying to remove SANS PAYS role:' + err);
                     });
                 }, DELAY);
             }
         }
-
-        checkIfReady(user, data);
     }, err => {
         data.channel.sendMessage('Something went wrong...');
     });
@@ -120,7 +130,7 @@ commands.setCountry = (input, data) => {
 
     // empty argument
     if (!input) {
-        data.channel.sendMessage('You need to enter in a role.');
+        data.channel.sendMessage('<@' + user.user.id + '>: You need to enter in a role.');
         return;
     }
 
@@ -129,7 +139,7 @@ commands.setCountry = (input, data) => {
     // make sure user doesn't already have a country role...
     // alternatively, maybe we should remove the old role?
     if (User.hasCountryRole(user)) {
-        data.channel.sendMessage('You\'ve already been tagged with a country.');
+        data.channel.sendMessage('<@' + user.user.id + '>: You\'ve already been tagged with a country.');
         return;
     }
 
@@ -142,33 +152,35 @@ commands.setCountry = (input, data) => {
 
     // role isn't in the list, or it's not a valid country role
     if (!role || !validRoles.includes(role)) {
-        data.channel.sendMessage('I don\'t recognize that country. I\'ve put in a request to add it.');
+        data.channel.sendMessage('<@' + user.user.id + '>: I don\'t recognize that country. I\'ve put in a request to add it.');
         requestTag(input, data, 'country');
         role = noRole;
     }
 
     // get the Role object
     let newRole = data.guild.roles.find('name', role);
+    let roles = [newRole];
 
-    user.addRole(newRole).then(response => {
+    if (userReady(user)) {
+        roles.push(getAccessRole(data));
+    }
+
+    user.addRoles(roles).then(response => {
         if (role !== noRole) {
-            data.channel.sendMessage('You\'ve been tagged with `' + role + '`.');
+            data.channel.sendMessage('<@' + user.user.id + '>: You\'ve been tagged with `' + role + '`.');
 
                 if (User.hasRole(user, [noRole])) {
                     let roleToRemove = data.guild.roles.find('name', noRole);
 
+
                     setTimeout(() => {
                         user.removeRole(roleToRemove).then((info) => {
-
-                            checkIfReady(user, data);
                         }, err => {
                             console.log('Error trying to remove SANS PAYS role:' + err);
                         });
                     }, DELAY);
                 }
         }
-console.log('checking if ready');
-        checkIfReady(user, data);
     }, err => {
         data.channel.sendMessage('Something went wrong...');
     });
@@ -176,9 +188,9 @@ console.log('checking if ready');
 
 commands.getList = (input, data) => {
     if (input === 'countries') {
-        data.channel.sendMessage('```' + Role.countriesFriendly.join('\n') + '```');
+        data.channel.sendMessage('```' + prettyPrint(Role.countriesFriendly) + '```');
     } else if (input === 'languages') {
-        data.channel.sendMessage('```' + Role.languagesFriendly.join('\n') + '```');
+        data.channel.sendMessage('```' + prettyPrint(Role.languagesFriendly) + '```');
     }
 };
 
@@ -186,15 +198,19 @@ commands.loadRoles = (data) => {
     if (!User.hasModRole(data.member)) return;
 
     for (var i = 0; i < Role.languages.length; i++) {
-        data.guild.createRole({ name: Role.languages[i] })
+	if (!data.guild.roles.find('name', Role.languages[i])) {
+	  data.guild.createRole({ name: Role.languages[i] })
           .then(role => console.log(`Created role ${role}`))
           .catch(console.error)
+	}
     }
 
     for (var i = 0; i < Role.countries.length; i++) {
-        data.guild.createRole({ name: Role.countries[i] })
+        if (!data.guild.roles.find('name', Role.countries[i])) {
+          data.guild.createRole({ name: Role.countries[i] })
           .then(role => console.log(`Created role ${role}`))
           .catch(console.error)
+        }
     }
 };
 
@@ -222,14 +238,14 @@ commands.tagUser = (input, data) => {
                     setTimeout(() => {
                         user.removeRole(roleToRemove).then((info) => {
 
-                            checkIfReady(user, data);
+                            //userReady(user, data);
                         }, err => {
                             console.log('Error trying to remove SANS PAYS role:' + err);
                         });
                     }, DELAY);
                 }
 
-                checkIfReady(user, data);
+                //userReady(user, data);
             }, err => {
                 data.channel.sendMessage('Something went wrong...');
             });
@@ -259,22 +275,37 @@ var requestTag = (input, data, type) => {
 
     // don't let the user request more than 3 times
     if (REQUESTS.id.length <= REQUEST_LIMIT && !hasDuplicate) {
-        let suggestions = data.guild.channels.find('name', 'server_log');
+        let suggestions = data.guild.channels.find('name', 'bot');
         suggestions.sendMessage(type + ' tag request by <@' + user.id + '>: `' + text + '`');
     }
 };
 
 // checks to see if user has all the proper roles to see all the chats
-var checkIfReady = (user, data) => {
-	if (User.hasProperRoles(user)) {
-        let role = data.guild.roles.find('name', 'Membre Officiel');
+// if this function is called and they have already 2 out of the 3 tags,
+// this means a third role is about to be added and therefore they
+// are granted access
+var userReady = (user) => {
+    return User.getProperRoleCount(user) >= 2;
+};
 
-        setTimeout(function() {
-            user.addRole(role).then(() => {}, err => {
-                console.log('Didn\'t add membre role sucucssfully.:' + err);
-            });
-        }, 0)
-    }
+// get access role
+var getAccessRole = (data) => {
+    return data.guild.roles.find('name', 'Membre Officiel');
+};
+
+
+var prettyPrint = (arr) => {
+    if (!arr) return;
+
+    var longestLength = arr.reduce(function (a, b) { return a.length > b.length ? a : b; }).length;
+
+    var prettyArr = arr.map(function(str) {
+        var spacesToAdd = longestLength - str.length;
+
+        return str.replace(' ', '\xa0') + ' '.repeat(spacesToAdd);
+    });
+
+    return prettyArr.join(' ');
 };
 
 // removes sans pays/sans langue role. make this more generic

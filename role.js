@@ -21,10 +21,13 @@ Role.countries = [];
 Role.countriesFriendly = [];
 Role.NO_COUNTRY = 'SANS PAYS';
 Role.NO_LANGUAGE = 'SANS LANGUE';
+Role.alts = {};
 
 var init = () => {
     db.query('SELECT * FROM languages').on('result', function(row) {
-		Role.names[row.friendly.toLowerCase()] = row.role;
+        Role.names[row.friendly.toLowerCase()] = row.role;
+		Role.alts[row.role.toLowerCase()] = row.role;
+
         if (!Role.languages.includes(row.role)) {
             Role.languages.push(row.role);
             Role.languagesFriendly.push(row.friendly);
@@ -38,6 +41,8 @@ var init = () => {
 
     db.query('SELECT * FROM countries').on('result', function(row) {
         Role.names[row.friendly.toLowerCase()] = row.role;
+        Role.alts[row.role.toLowerCase()] = row.role;
+
         if (!Role.countries.includes(row.role)) {
             Role.countries.push(row.role);
             Role.countriesFriendly.push(row.friendly);
@@ -67,7 +72,7 @@ Role.isCountryRole = (role) => {
 }
 
 // possible names for each role
-Role.alts = {
+Role.alts = Object.assign(Role.alts, {
     // 'beginner': Role.names.BEGINNER,
     // 'debutant': Role.names.BEGINNER,
     // 'débutant': Role.names.BEGINNER,
@@ -102,23 +107,24 @@ Role.alts = {
     // 'finnish': Role.names.FINNISH,
     // 'finnois': Role.names.FINNISH,
     // countries
+    'français': 'Francophone Natif',
     'united states': 'États-Unis',
     'united states of america': 'États-Unis',
     'us': 'États-Unis',
     'usa': 'États-Unis',
-    'america': 'États-Unis'
+    'america': 'États-Unis',
+    'uk': 'Royaume-Uni',
+    'united kingdom': 'Royaume-Uni'
     // 'etats-unis': Role.names.UNITED_STATES,
     // 'états-unis': Role.names.UNITED_STATES,
     // 'états unis': Role.names.UNITED_STATES,
     // 'etats unis': Role.names.UNITED_STATES,
-    // 'uk': Role.names.UNITED_KINGDOM,
-    // 'united kingdom': Role.names.UNITED_KINGDOM,
     // 'ireland': Role.names.IRELAND,
     // 'irlande': Role.names.IRELAND,
     // 'australia': Role.names.AUSTRALIA,
     // 'australie': Role.names.AUSTRALIA,
     // 'france': Role.names.FRANCE,
     // 'canada': Role.names.CANADA,
-}
+});
 
 module.exports = Role;
