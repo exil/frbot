@@ -55,6 +55,7 @@ commands.setFrenchLevel = (input, data) => {
     user.addRoles(roles).then(response => {
         data.channel.sendMessage('<@' + user.user.id + '>: You\'ve been tagged with `' + role + '`.');
     }, err => {
+console.log(err);
         data.channel.sendMessage('Something went wrong...');
     });
 };
@@ -118,6 +119,7 @@ commands.setNativeLanguage = (input, data) => {
             }
         }
     }, err => {
+console.log(err);
         data.channel.sendMessage('Something went wrong...');
     });
 };
@@ -182,6 +184,7 @@ commands.setCountry = (input, data) => {
                 }
         }
     }, err => {
+		console.log(err);
         data.channel.sendMessage('Something went wrong...');
     });
 };
@@ -247,6 +250,7 @@ commands.tagUser = (input, data) => {
 
                 //userReady(user, data);
             }, err => {
+console.log(err);
                 data.channel.sendMessage('Something went wrong...');
             });
         }, DELAY);
