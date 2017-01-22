@@ -9,7 +9,6 @@ var bot = new Discord.Client();
 bot.on("message", msg => {
     if(msg.author.bot) return;
 
-    if (msg.channel.type === 'dm') return;
 
     //if (ADMIN_MODE && !msg.member.user.roles.exists('id', '242563745556070400')) return;
 
@@ -23,6 +22,8 @@ bot.on("message", msg => {
 
     if (!command) return;
 
+
+
     // for single argument commands, only allow one space.
     // if more than one space, assume argument is multi-word
     var arg = commandArgs.slice(1).join(' ');
@@ -33,6 +34,16 @@ bot.on("message", msg => {
     }
 
     arg = arg.trim();
+    
+
+	if (msg.channel.type === 'dm') {
+		if (command.startsWith(prefix + 'suggest')) {
+			commands.addSuggestion(arg, msg, bot);
+		} else {
+			commands.dmSent(arg, msg, bot);
+		}
+		return;
+	}
 
 	if (command.startsWith(prefix + 'french') || command.startsWith(prefix + 'level')) {
 		commands.setFrenchLevel(arg, msg);
@@ -42,6 +53,8 @@ bot.on("message", msg => {
 		commands.setCountry(arg, msg);
 	}  else if (command.startsWith(prefix + 'list')) {
 		commands.getList(arg, msg);
+	} else if (command.startsWith(prefix + 'suggest')) {
+		commands.warnSuggestion(arg, msg);
 	} else if (command.startsWith(prefix + 'remind')) {
 		// todo
 	} else if (command.startsWith(prefix + 'tag')) {
@@ -61,9 +74,18 @@ bot.on("message", msg => {
 		`);
 	}
 
-    // grab meta data
+    // admin only
     if (User.hasModRole(msg.member)) {
-        if (command.startsWith(prefix + 'grabthestuff')) {
+    	var terms = arg.split('|');
+		var english = terms[0];
+		var french = terms[1];
+		if (command.startsWith(prefix + 'addlanguage')) {
+			commands.addNewRole(english, french, 'languages', msg);
+		} else if (command.startsWith(prefix + 'addcountry')) {
+			commands.addNewRole(english, french, 'countries', msg);
+		}
+
+	/*    if (command.startsWith(prefix + 'grabthestuff')) {
             // print out all the roles
             console.log(msg.guild.roles.map(function(role, index) {
                 return {
@@ -81,6 +103,7 @@ bot.on("message", msg => {
         } else if (command.startsWith(prefix + 'load')) {
 			//commands.loadRoles(msg);//commands.load(msg);
 		}
+	*/
      }
 
     return;

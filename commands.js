@@ -217,6 +217,51 @@ commands.loadRoles = (data) => {
     }
 };
 
+commands.addSuggestion = (input, data, bot) => {
+	let suggestions = bot.channels.find('name', 'bot');
+	let user = data.author;
+	
+	user.sendMessage('Thank you for your suggestion. Your suggestion will be considered by the mod team.')
+ 		.then(message => console.log(`Sent message: ${message.content}`))
+ 		.catch(console.error);
+
+    suggestions.sendMessage('Suggestion by <@' + user.id + '>: `' + input + '`');
+};
+
+commands.warnSuggestion = (input, data) => {
+	let user = data.member.user;
+
+	data.channel.sendMessage('<@' + user.id + '>: Please check your private messages for more information on making suggestions.');
+
+	user.sendMessage('To make a suggestion, please reply to this message using the following command:```!suggest yoursuggestionhere```')
+ 		.then(message => console.log(`Sent message: ${message.content}`))
+ 		.catch(console.error);
+};
+
+commands.dmSent = (input, data, bot) => {
+	let suggestions = bot.channels.find('name', 'bot');
+	let user = data.author;
+
+	suggestions.sendMessage('New message to Nostradamus by <@' + user.id + '>: `' + input + '`');
+}
+
+commands.addNewRole = (english, french, type, data) => {
+	// add role, then add it to database
+	// data.guild.channels.find('name', 'bot');
+	var channel = data.channel;
+
+	if (data.channel.id === '254540604908896256') {
+		if (!data.guild.roles.find('name', french)) {
+			data.guild.createRole({ name: french })
+			.then(role => console.log(`Created role ${role}`))
+            .catch(console.error);
+
+			// then add to database
+			Role.add(english, french, type);
+		}
+	}
+};
+
 commands.tagUser = (input, data) => {
     let userId = data.mentions.users.first();
 
