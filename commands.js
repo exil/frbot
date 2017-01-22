@@ -253,7 +253,10 @@ commands.addNewRole = (english, french, type, data) => {
 	if (data.channel.id === '254540604908896256') {
 		if (!data.guild.roles.find('name', french)) {
 			data.guild.createRole({ name: french })
-			.then(role => console.log(`Created role ${role}`))
+			.then(role => {
+				data.channel.sendMessage('Added new role: ' + french);
+				console.log(`Created role ${role}`)
+			})
             .catch(console.error);
 
 			// then add to database

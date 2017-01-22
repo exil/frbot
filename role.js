@@ -60,13 +60,17 @@ init();
 
 Role.add = (english, french, type) => {
 	db.query('SET NAMES utf8');
-	db.query('INSERT INTO ? (friendly, role) VALUES (?, ?)', [type, english, french], function (error, results, fields) {
-		if (error) {
-			console.log('error adding role to database:' + error);
-		} else {
-			console.log('added ' + english + '|' + french + 'to ' + type + ' table');
-		}
-	});
+
+	if (type === 'countries' || type === 'languages') {
+			var start = 'INSERT INTO ' + type;
+			db.query(start + ' (friendly, role) VALUES (?, ?)', [english, french], function (error, results, fields) {
+				if (error) {
+					console.log('error adding role to database:' + error);
+				} else {
+					console.log('added ' + english + '|' + french + ' to ' + type + ' table');
+				}
+			});
+	}
 };
 
 // helper functions

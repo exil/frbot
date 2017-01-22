@@ -15,14 +15,19 @@ bot.on("message", msg => {
     let prefix = commands.prefix;
     let content = msg.content;
 
+	if (msg.channel.type === 'dm') {
+        if (!content.startsWith(prefix)) {
+            commands.dmSent(content, msg, bot);
+        	return;
+		}
+    }
+
     if(!content.startsWith(prefix)) return;
 
     let command = content.toLowerCase();
     let commandArgs = command.split(' ');
 
     if (!command) return;
-
-
 
     // for single argument commands, only allow one space.
     // if more than one space, assume argument is multi-word
@@ -34,14 +39,12 @@ bot.on("message", msg => {
     }
 
     arg = arg.trim();
-    
 
 	if (msg.channel.type === 'dm') {
 		if (command.startsWith(prefix + 'suggest')) {
 			commands.addSuggestion(arg, msg, bot);
-		} else {
-			commands.dmSent(arg, msg, bot);
 		}
+
 		return;
 	}
 
@@ -75,8 +78,13 @@ bot.on("message", msg => {
 	}
 
     // admin only
+
+	// case sensitive
+    let commandArgsCS = content.split(' ');
+
+    var argCS = commandArgsCS.slice(1).join(' ');
     if (User.hasModRole(msg.member)) {
-    	var terms = arg.split('|');
+    	var terms = argCS.split('|');
 		var english = terms[0];
 		var french = terms[1];
 		if (command.startsWith(prefix + 'addlanguage')) {
