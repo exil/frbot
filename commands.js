@@ -48,7 +48,7 @@ commands.setFrenchLevel = (input, data) => {
         roles.push(data.guild.roles.find('name', 'Étudiant'));
     }
 
-    if (userReady(user, isNative)) {
+    if (userReady(user, isNative)  && !User.hasRole(user, ['Membre Officiel'])) {
         roles.push(getAccessRole(data));
     }
 
@@ -99,7 +99,7 @@ commands.setNativeLanguage = (input, data) => {
     let newRole = data.guild.roles.find('name', role);
     let roles = [newRole];
 
-    if (userReady(user, isFrench)) {
+    if (userReady(user, isFrench) && !User.hasRole(user, ['Membre Officiel'])) {
         roles.push(getAccessRole(data));
     }
 
@@ -162,13 +162,13 @@ commands.setCountry = (input, data) => {
     // get the Role object
     let newRole = data.guild.roles.find('name', role);
     let roles = [newRole];
-
-    if (userReady(user)) {
+    
+	if (userReady(user) && !User.hasRole(user, ['Membre Officiel'])) {
         roles.push(getAccessRole(data));
     }
-
-    user.addRoles(roles).then(response => {
-        if (role !== noRole) {
+    
+	user.addRoles(roles).then(response => {
+		if (role !== noRole) {
             data.channel.sendMessage('<@' + user.user.id + '>: You\'ve been tagged with `' + role + '`.');
 
                 if (User.hasRole(user, [noRole])) {
