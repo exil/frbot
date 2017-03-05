@@ -14,6 +14,7 @@ var DELAY = 3000;
 commands.setFrenchLevel = (input, data) => {
     let validRoles = Role.studentRoles;
     var user = data.member;
+	var previousRole = '';
 
     // empty argument
     if (!input) {
@@ -26,13 +27,12 @@ commands.setFrenchLevel = (input, data) => {
     // make sure user doesn't already have a student or native role...
     // alternatively, maybe we should remove the old role?
     if (User.hasLevelRole(user)) {
-        data.channel.sendMessage('<@' + user.user.id + '>: You\'ve already been tagged with a French level...');
-        return;
+		previousRole = User.getRole(user, Role.studentRoles);
     }
 
     // find role in alt list
     let role = Role.names[text];
-    let isNative = text !== 'native';
+    let isStudent = text !== 'native';
 
     // role isn't in the list, or it's not a valid normal user role
     if (!role || !validRoles.includes(role)) {
@@ -40,20 +40,40 @@ commands.setFrenchLevel = (input, data) => {
         return;
     }
 
+	if (role === previousRole) {
+		data.channel.sendMessage('<@' + user.user.id + '>: You already have that role.');
+        return;
+	}
+
     // get the Role object
     let newRole = data.guild.roles.find('name', role);
     let roles = [newRole];
 
-    if (isNative) {
+    if (isStudent && !previousRole.length) {
         roles.push(data.guild.roles.find('name', 'Étudiant'));
     }
 
-    if (userReady(user, isNative)  && !User.hasRole(user, ['Membre Officiel'])) {
+    if (userReady(user)  && !User.hasRole(user, ['Membre Officiel'])) {
         roles.push(getAccessRole(data));
     }
 
     user.addRoles(roles).then(response => {
-        data.channel.sendMessage('<@' + user.user.id + '>: You\'ve been tagged with `' + role + '`.');
+		if (previousRole) {
+			data.channel.sendMessage('<@' + user.user.id + '>: Your level has been changed to `' + role + '`.');
+		} else {
+        	data.channel.sendMessage('<@' + user.user.id + '>: You\'ve been tagged with `' + role + '`.');
+		}
+
+		if (User.hasRole(user, [previousRole])) {
+			let roleToRemove = data.guild.roles.find('name', previousRole);
+
+			setTimeout(() => {
+				user.removeRole(roleToRemove).then((info) => {
+				}, err => {
+					console.log('Error trying to remove SANS PAYS role:' + err);
+				});
+			}, DELAY);
+		}
     }, err => {
 console.log(err);
         data.channel.sendMessage('Something went wrong...');
@@ -89,17 +109,24 @@ commands.setNativeLanguage = (input, data) => {
         requestTag(input, data, 'language');
     }
 
-    let isFrench = text === 'french';
+    let isFrench = text === 'french' || text === 'francais' || text === 'français';
 
 	if (isFrench) {
 		role = Role.names.native;
+	}
+
+	if (User.hasRole(user, [role])) {
+		if (role !== noRole) { 
+	    	data.channel.sendMessage('<@' + user.user.id + '>: You already have that role.');
+        }
+		return;
 	}
 
     // get the Role object
     let newRole = data.guild.roles.find('name', role);
     let roles = [newRole];
 
-    if (userReady(user, isFrench) && !User.hasRole(user, ['Membre Officiel'])) {
+    if (userReady(user) && !User.hasRole(user, ['Membre Officiel'])) {
         roles.push(getAccessRole(data));
     }
 
@@ -159,6 +186,13 @@ commands.setCountry = (input, data) => {
         role = noRole;
     }
 
+	if (User.hasRole(user, [role])) {
+        if (role !== noRole) {
+            data.channel.sendMessage('<@' + user.user.id + '>: You already have that role.');
+        }
+        return;
+    }
+
     // get the Role object
     let newRole = data.guild.roles.find('name', role);
     let roles = [newRole];
@@ -173,7 +207,6 @@ commands.setCountry = (input, data) => {
 
                 if (User.hasRole(user, [noRole])) {
                     let roleToRemove = data.guild.roles.find('name', noRole);
-
 
                     setTimeout(() => {
                         user.removeRole(roleToRemove).then((info) => {

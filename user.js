@@ -58,4 +58,16 @@ User.hasRole = (user, roles) => {
     return false;
 }
 
+User.getRole = (user, roles) => {
+    if (!user) return false;
+
+    for (let i = 0, len = roles.length; i < len; i++) {
+        if (user.roles.exists('name', roles[i])) {
+            return roles[i];
+        }
+    }
+
+    return '';
+}
+
 module.exports = User;
