@@ -22,6 +22,11 @@ commands.setFrenchLevel = (input, data) => {
         return;
     }
 
+	if (!user) {
+		console.log('user doesn\'t exist');
+		return;
+	}
+
     let text = input.toLowerCase();
 
     // make sure user doesn't already have a student or native role...
@@ -92,7 +97,12 @@ commands.setNativeLanguage = (input, data) => {
         return;
     }
 
-    let text = input.toLowerCase();
+	if (!user) {
+		console.log('user doesn\'t exist');
+		return;
+	}
+    
+	let text = input.toLowerCase();
 
     // find role in alt list
     var role = Role.names[text];
@@ -162,6 +172,11 @@ commands.setCountry = (input, data) => {
         data.channel.sendMessage('<@' + user.user.id + '>: You need to enter in a role.');
         return;
     }
+
+	if (!user) {
+        console.log('user doesn\'t exist');
+        return;
+    }	
 
     let text = input.toLowerCase();
 
@@ -282,6 +297,10 @@ commands.addNewRole = (english, french, type, data) => {
 	// add role, then add it to database
 	// data.guild.channels.find('name', 'bot');
 	var channel = data.channel;
+
+	if (!english || !french || !type || !data) {
+		return;
+	}
 
 	if (data.channel.id === '254540604908896256') {
 		if (!data.guild.roles.find('name', french)) {

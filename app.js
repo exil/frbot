@@ -56,6 +56,8 @@ bot.on("message", msg => {
 		commands.setCountry(arg, msg);
 	}  else if (command.startsWith(prefix + 'list')) {
 		commands.getList(arg, msg);
+	} else if (command.startsWith(prefix + 'activity')) {
+		commands.setActivity(arg,msg);
 	} else if (command.startsWith(prefix + 'suggest')) {
 		commands.warnSuggestion(arg, msg);
 	} else if (command.startsWith(prefix + 'remind')) {
@@ -120,7 +122,7 @@ bot.on("message", msg => {
 bot.on("guildMemberAdd", (member) => {
     // add New role
 	member.guild.defaultChannel.sendMessage(`
-		**Welcome to the official /r/French Discord, <@${member.user.id}>! To gain access to the chat, please follow these instructions to set your proficiency in French, native language (if not French), and country.**\n`);
+		**Welcome to the official /r/French Discord, <@${member.user.id}>! To send messages in the other channels, please follow these instructions to set your proficiency in French, native language (if not French), and country.**\n`);
 			member.guild.defaultChannel.sendMessage(`
 
 1. Set your proficiency in French.
@@ -143,6 +145,8 @@ bot.on("guildMemberAdd", (member) => {
 \`\`\`
 !language [yourlanguagehere] or !country [yourcountryhere]
 \`\`\`
+
+*If you still cannot send messages in the other channels after tagging yourself, please message or tag one of the moderators.*
 `);
 });
 
